@@ -1,20 +1,26 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { getCdPageInfo } from '../data/cdEmblems'
 import './CDPage.css'
 
+const DEFAULT_EMBLEM = (import.meta.env.BASE_URL || '/') + 'emblem.png'
+
 function CDPage({ nodeName, onBack }) {
   const info = getCdPageInfo(nodeName)
+  const [emblemSrc, setEmblemSrc] = useState(info.emblemUrl)
+
+  const handleEmblemError = () => setEmblemSrc(DEFAULT_EMBLEM)
 
   return (
     <div className="cd-page">
       <button type="button" className="cd-page-back" onClick={onBack}>
-        ← Назад к карте
+        ← Закрыть
       </button>
       <div className="cd-page-header">
         <img
-          src={info.emblemUrl}
+          src={emblemSrc}
           alt=""
           className="cd-page-emblem"
+          onError={handleEmblemError}
         />
         <div className="cd-page-text">
           <h1 className="cd-page-title">{info.title}</h1>

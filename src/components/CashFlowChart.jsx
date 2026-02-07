@@ -95,12 +95,7 @@ function CashFlowChart() {
                 stroke="#a0aec0"
                 tick={{ fill: '#a0aec0' }}
               />
-              <ReferenceLine
-                x={CURRENT_YEAR}
-                stroke="#dc2626"
-                strokeWidth={2}
-                label={{ value: 'Текущий срез', position: 'top', fill: '#dc2626', fontSize: 11 }}
-              />
+              <ReferenceLine x={CURRENT_YEAR} stroke="#f87171" strokeWidth={2} />
               <YAxis 
                 stroke="#a0aec0"
                 tick={{ fill: '#a0aec0' }}
@@ -136,12 +131,7 @@ function CashFlowChart() {
                 stroke="#a0aec0"
                 tick={{ fill: '#a0aec0' }}
               />
-              <ReferenceLine
-                x={CURRENT_YEAR}
-                stroke="#dc2626"
-                strokeWidth={2}
-                label={{ value: 'Текущий срез', position: 'top', fill: '#dc2626', fontSize: 11 }}
-              />
+              <ReferenceLine x={CURRENT_YEAR} stroke="#f87171" strokeWidth={2} />
               <YAxis 
                 stroke="#a0aec0"
                 tick={{ fill: '#a0aec0' }}
@@ -168,7 +158,7 @@ function CashFlowChart() {
           </ResponsiveContainer>
         </div>
       </div>
-      <p className="cashflow-prognoz-hint">Красная вертикальная линия — текущий срез ({CURRENT_YEAR}). Справа от неё — прогноз.</p>
+      <p className="cashflow-prognoz-hint">Вертикальная линия — текущий срез ({CURRENT_YEAR}). Справа — прогноз.</p>
 
       {breakEvenPoint && (
         <div className="break-even-alert">

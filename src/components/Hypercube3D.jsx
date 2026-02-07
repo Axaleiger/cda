@@ -460,10 +460,7 @@ function Scene({ npv, reserves, extraction, onPointClick, onOpenBpm, selectedVar
             npv={npv}
             reserves={reserves}
             extraction={extraction}
-            onPointClick={(variantId) => {
-              onPointClick(variantId)
-              onOpenBpm?.(null)
-            }}
+            onPointClick={onPointClick}
           />
         ))}
       </group>
@@ -542,47 +539,38 @@ function Hypercube3D({ onOpenBpm }) {
   return (
     <div className="hypercube-container">
       <div className="hypercube-controls">
-        <div className="control-group">
-          <label>
-            NPV (оперативный рычаг — деньги за год): {npv}%
-            <span className="control-value"> ({npvMillions} млн руб)</span>
-            <input
-              type="range"
-              min="0"
-              max="100"
-              value={npv}
-              onChange={(e) => setNpv(Number(e.target.value))}
-              className="slider"
-            />
-          </label>
+        <div className="control-group control-group-inline" title="NPV (оперативный рычаг — деньги за год)">
+          <label>NPV: {npv}% ({npvMillions} млн руб)</label>
+          <input
+            type="range"
+            min="0"
+            max="100"
+            value={npv}
+            onChange={(e) => setNpv(Number(e.target.value))}
+            className="slider"
+          />
         </div>
-        <div className="control-group control-group-oneline">
-          <label className="slider-label-oneline" title="Запасы (стратегический рычаг — суммарная добыча нефти/КИН за 30 лет)">
-            <span className="slider-label-text">Запасы (стратегический рычаг — суммарная добыча нефти/КИН за 30 лет): {reserves}%</span>
-            <span className="control-value"> ({reservesMillions} млн т)</span>
-            <input
-              type="range"
-              min="0"
-              max="100"
-              value={reserves}
-              onChange={(e) => setReserves(Number(e.target.value))}
-              className="slider"
-            />
-          </label>
+        <div className="control-group control-group-inline" title="Запасы (стратегический рычаг — суммарная добыча нефти/КИН за 30 лет)">
+          <label>Запасы: {reserves}% ({reservesMillions} млн т)</label>
+          <input
+            type="range"
+            min="0"
+            max="100"
+            value={reserves}
+            onChange={(e) => setReserves(Number(e.target.value))}
+            className="slider"
+          />
         </div>
-        <div className="control-group">
-          <label>
-            Добыча (Q, млн т) — оперативный рычаг добычи нефти за год: {extraction}%
-            <span className="control-value"> ({extractionMillions} млн т)</span>
-            <input
-              type="range"
-              min="0"
-              max="100"
-              value={extraction}
-              onChange={(e) => setExtraction(Number(e.target.value))}
-              className="slider"
-            />
-          </label>
+        <div className="control-group control-group-inline" title="Добыча (Q, млн т) — оперативный рычаг добычи нефти за год">
+          <label>Добыча: {extraction}% ({extractionMillions} млн т)</label>
+          <input
+            type="range"
+            min="0"
+            max="100"
+            value={extraction}
+            onChange={(e) => setExtraction(Number(e.target.value))}
+            className="slider"
+          />
         </div>
       </div>
 

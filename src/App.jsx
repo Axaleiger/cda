@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import './App.css'
 import RussiaMap from './components/RussiaMap'
 import WindRose from './components/WindRose'
@@ -9,12 +9,28 @@ import CashFlowChart from './components/CashFlowChart'
 import CDPage from './components/CDPage'
 import BPMBoard from './components/BPMBoard'
 
+function getBpmPageUrl(highlight) {
+  const base = typeof window !== 'undefined' ? window.location.origin + window.location.pathname : ''
+  const sep = base.includes('?') ? '&' : '?'
+  return `${base}${sep}bpm=1&highlight=${encodeURIComponent(highlight || '')}`
+}
+
 function App() {
   const [selectedLeftStageIndex, setSelectedLeftStageIndex] = useState(null)
   const [selectedRightObjectIndex, setSelectedRightObjectIndex] = useState(null)
   const [cdPageNode, setCdPageNode] = useState(null)
   const [showBpm, setShowBpm] = useState(false)
   const [bpmHighlight, setBpmHighlight] = useState(null)
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const cd = params.get('cd')
+    if (cd) setCdPageNode(decodeURIComponent(cd))
+    if (params.get('bpm') === '1') {
+      setShowBpm(true)
+      setBpmHighlight(params.get('highlight') || null)
+    }
+  }, [])
 
   const rightRoseData = useMemo(() => {
     if (selectedLeftStageIndex != null) {
@@ -36,7 +52,7 @@ function App() {
   if (cdPageNode) {
     return (
       <div className="app">
-        <CDPage nodeName={cdPageNode} onBack={() => setCdPageNode(null)} />
+        <CDPage nodeName={cdPageNode} onBack={() => { setCdPageNode(null); if (window.history.length > 1) window.history.back(); else window.close(); }} />
       </div>
     )
   }
@@ -66,7 +82,7 @@ function App() {
         {/* Карта объектов ЦДА */}
         <section className="section map-section">
           <h2>Карта объектов ЦДА</h2>
-          <RussiaMap onCdNodeClick={setCdPageNode} />
+          <RussiaMap />
         </section>
 
         {/* Карта здоровья цифровых двойников */}
@@ -99,7 +115,7 @@ function App() {
         {/* NPV, запасы, добыча — гиперкуб */}
         <section className="section hypercube-section">
           <h2>NPV, Запасы, Добыча</h2>
-          <Hypercube3D onOpenBpm={(highlight) => { setBpmHighlight(highlight); setShowBpm(true) }} />
+          <Hypercube3D onOpenBpm={(highlight) => window.open(getBpmPageUrl(highlight), '_blank')} />
         </section>
 
         {/* Cash Flow и график добычи */}

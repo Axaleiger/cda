@@ -129,6 +129,16 @@
   pointer-events: none;
 }
 
+.map-chain-node-link {
+  cursor: pointer;
+  outline: none;
+}
+
+.map-chain-node-link .map-chain-node-label {
+  text-decoration: underline;
+  pointer-events: none;
+}
+
 .map-chain-fo {
   overflow: visible;
 }

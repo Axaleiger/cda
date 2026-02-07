@@ -46,7 +46,8 @@ export const CD_EMBLEM_MAP = {
 export function getCdPageInfo(nodeName) {
   const info = CD_EMBLEM_MAP[nodeName]
   if (info) {
-    return { ...info, emblemUrl: BASE + encodeURIComponent(info.emblem) }
+    const emblemUrl = BASE + info.emblem
+    return { ...info, emblemUrl }
   }
   return {
     emblemUrl: BASE + 'emblem.png',

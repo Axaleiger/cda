@@ -114,7 +114,11 @@ function CFArrowsLayer({ show, arrows, hoveredIndex, setHoveredIndex }) {
   )
 }
 
-function RussiaMap({ onCdNodeClick }) {
+function getCdPageUrl(nodeName) {
+  return `${typeof window !== 'undefined' ? window.location.origin + window.location.pathname : ''}?cd=${encodeURIComponent(nodeName)}`
+}
+
+function RussiaMap() {
   const [selectedId, setSelectedId] = useState(null)
   const [hoveredId, setHoveredId] = useState(null)
   const [showBudgetFill, setShowBudgetFill] = useState(false)
@@ -256,13 +260,7 @@ function RussiaMap({ onCdNodeClick }) {
               <Annotation subject={[point.lon, point.lat]} dx={24} dy={16}>
                 <g className="map-chain-vertical">
                   {chain.nodes.map((name, i) => (
-                    <g
-                      key={i}
-                      transform={`translate(0, ${i * 36})`}
-                      className="map-chain-node"
-                      style={{ cursor: onCdNodeClick ? 'pointer' : 'default' }}
-                      onClick={() => onCdNodeClick && onCdNodeClick(name)}
-                    >
+                    <g key={i} transform={`translate(0, ${i * 36})`} className="map-chain-node">
                       {i > 0 && (
                         <line
                           x1={0}
@@ -285,17 +283,24 @@ function RussiaMap({ onCdNodeClick }) {
                       >
                         {i + 1}
                       </text>
-                      <text
-                        textAnchor="start"
-                        x={16}
-                        y={4}
-                        fill="#2d5a87"
-                        fontSize={12}
-                        fontWeight="600"
-                        className="map-chain-node-label"
+                      <a
+                        href={getCdPageUrl(name)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="map-chain-node-link"
                       >
-                        {name}
-                      </text>
+                        <text
+                          textAnchor="start"
+                          x={16}
+                          y={4}
+                          fill="#2d5a87"
+                          fontSize={12}
+                          fontWeight="600"
+                          className="map-chain-node-label"
+                        >
+                          {name}
+                        </text>
+                      </a>
                     </g>
                   ))}
                 </g>

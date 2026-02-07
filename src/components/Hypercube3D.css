@@ -5,10 +5,11 @@
 }
 
 .hypercube-controls {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1.5rem;
-  padding: 1.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem 1.5rem;
+  padding: 1rem 1.5rem;
   background: #f8fafc;
   border-radius: 12px;
   border: 1px solid #e2e8f0;
@@ -20,32 +21,23 @@
   gap: 0.5rem;
 }
 
+.control-group-inline {
+  flex: 1;
+  min-width: 140px;
+  max-width: 280px;
+}
+
 .control-group label {
   color: #2c3e50;
-  font-size: 1.15rem;
+  font-size: 0.95rem;
   font-weight: 500;
+  white-space: nowrap;
 }
 
 .control-value {
   font-size: 1.05rem;
   color: #5a6c7d;
   font-weight: 400;
-}
-
-.control-group-oneline label {
-  display: flex;
-  flex-wrap: nowrap;
-  align-items: center;
-  gap: 0.35rem;
-  white-space: nowrap;
-  overflow: hidden;
-}
-
-.slider-label-oneline .slider-label-text {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  min-width: 0;
-  white-space: nowrap;
 }
 
 .slider {
