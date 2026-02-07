@@ -20,6 +20,12 @@
   gap: 2rem;
 }
 
+.cashflow-prognoz-hint {
+  margin: -0.5rem 0 0;
+  font-size: 0.9rem;
+  color: #64748b;
+}
+
 .chart-container {
   background: #f8fafc;
   border-radius: 12px;

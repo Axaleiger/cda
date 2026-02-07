@@ -6,9 +6,15 @@ import { PRODUCTION_STAGES, OBJECTS_BY_STAGE, DEFAULT_OBJECTS } from './data/ros
 import Hypercube3D from './components/Hypercube3D'
 import LifecycleChart from './components/LifecycleChart'
 import CashFlowChart from './components/CashFlowChart'
+import CDPage from './components/CDPage'
+import BPMBoard from './components/BPMBoard'
+
 function App() {
   const [selectedLeftStageIndex, setSelectedLeftStageIndex] = useState(null)
   const [selectedRightObjectIndex, setSelectedRightObjectIndex] = useState(null)
+  const [cdPageNode, setCdPageNode] = useState(null)
+  const [showBpm, setShowBpm] = useState(false)
+  const [bpmHighlight, setBpmHighlight] = useState(null)
 
   const rightRoseData = useMemo(() => {
     if (selectedLeftStageIndex != null) {
@@ -27,6 +33,25 @@ function App() {
     setSelectedRightObjectIndex((prev) => (prev === index ? null : index))
   }
 
+  if (cdPageNode) {
+    return (
+      <div className="app">
+        <CDPage nodeName={cdPageNode} onBack={() => setCdPageNode(null)} />
+      </div>
+    )
+  }
+
+  if (showBpm) {
+    return (
+      <div className="app">
+        <BPMBoard
+          highlightCardName={bpmHighlight}
+          onClose={() => { setShowBpm(false); setBpmHighlight(null) }}
+        />
+      </div>
+    )
+  }
+
   return (
     <div className="app">
       <header className="app-header">
@@ -41,7 +66,7 @@ function App() {
         {/* Карта объектов ЦДА */}
         <section className="section map-section">
           <h2>Карта объектов ЦДА</h2>
-          <RussiaMap />
+          <RussiaMap onCdNodeClick={setCdPageNode} />
         </section>
 
         {/* Карта здоровья цифровых двойников */}
@@ -74,7 +99,7 @@ function App() {
         {/* NPV, запасы, добыча — гиперкуб */}
         <section className="section hypercube-section">
           <h2>NPV, Запасы, Добыча</h2>
-          <Hypercube3D />
+          <Hypercube3D onOpenBpm={(highlight) => { setBpmHighlight(highlight); setShowBpm(true) }} />
         </section>
 
         {/* Cash Flow и график добычи */}

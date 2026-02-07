@@ -1,0 +1,111 @@
+.bpm-board-wrap {
+  min-height: 100vh;
+  background: #f1f5f9;
+  padding: 1.5rem;
+}
+
+.bpm-board-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  padding: 0.75rem 1rem;
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+}
+
+.bpm-board-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #1e3a5f;
+  font-weight: 600;
+}
+
+.bpm-board-close {
+  padding: 0.5rem 1rem;
+  font-size: 0.95rem;
+  color: #2d5a87;
+  background: #fff;
+  border: 1px solid #2d5a87;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.bpm-board-close:hover {
+  background: rgba(45, 90, 135, 0.08);
+}
+
+.bpm-board {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+  min-height: 320px;
+}
+
+.bpm-stage-column {
+  flex: 0 0 220px;
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  min-height: 280px;
+}
+
+.bpm-stage-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #2d5a87;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #2d5a87;
+}
+
+.bpm-stage-cards {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.bpm-card {
+  padding: 0.6rem 0.75rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  cursor: grab;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  transition: box-shadow 0.15s, border-color 0.15s;
+}
+
+.bpm-card:hover {
+  border-color: #2d5a87;
+  box-shadow: 0 2px 8px rgba(45, 90, 135, 0.12);
+}
+
+.bpm-card:active {
+  cursor: grabbing;
+}
+
+.bpm-card-highlight {
+  border-color: #16a34a;
+  background: rgba(22, 163, 74, 0.12);
+  box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.35);
+}
+
+.bpm-card-id {
+  font-size: 0.75rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.bpm-card-name {
+  font-size: 0.9rem;
+  color: #1e3a5f;
+  font-weight: 500;
+}

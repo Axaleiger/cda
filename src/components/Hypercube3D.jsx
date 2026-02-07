@@ -178,6 +178,21 @@ function valueToColor(t) {
   return `hsl(${H}, ${S}%, ${L}%)`
 }
 
+const POINT_STATUS_COLORS = {
+  ok: null,
+  critical: '#b91c1c',
+  no_data: '#6b7280',
+  bad_calc: '#ea580c',
+}
+
+function getPointStatus(variantId) {
+  const k = variantId % 11
+  if (k === 0) return 'critical'
+  if (k === 1 || k === 5) return 'no_data'
+  if (k === 2 || k === 6) return 'bad_calc'
+  return 'ok'
+}
+
 function VariantPoint({ variantId, npv, reserves, extraction, onPointClick }) {
   const basePos = useMemo(() => getVariantBasePosition(variantId), [variantId])
   const x = basePos[0]
@@ -188,7 +203,9 @@ function VariantPoint({ variantId, npv, reserves, extraction, onPointClick }) {
   const nz = (z + CUBE_HALF) / (2 * CUBE_HALF)
   const t = (nx * (npv / 100) * 0.4 + ny * (reserves / 100) * 0.35 + nz * (extraction / 100) * 0.25) + (variantId % 19) / 190
   const T = Math.min(1, Math.max(0, t))
-  const color = valueToColor(T)
+  const status = getPointStatus(variantId)
+  const statusColor = POINT_STATUS_COLORS[status]
+  const color = statusColor != null ? statusColor : valueToColor(T)
 
   return (
     <mesh
@@ -262,7 +279,7 @@ const planeRiskFragmentShader = `
   }
 `
 
-function FunnelLevel({ levelIndex, layerTitle, color, onPointClick, selectedPlanePoint, getEntityLabel, showRisks, riskTint, npv = 50, reserves = 50, extraction = 50 }) {
+function FunnelLevel({ levelIndex, layerTitle, color, onPointClick, onOpenBpm, selectedPlanePoint, getEntityLabel, showRisks, riskTint, npv = 50, reserves = 50, extraction = 50 }) {
   const planeY = getPlaneY(levelIndex)
   const size = getPlaneSize(levelIndex)
   const n = POINTS_PER_LEVEL[levelIndex]
@@ -309,6 +326,7 @@ function FunnelLevel({ levelIndex, layerTitle, color, onPointClick, selectedPlan
             onClick={(e) => {
               e.stopPropagation()
               onPointClick(levelIndex, idx)
+              if (getEntityLabel && onOpenBpm) onOpenBpm(getEntityLabel(levelIndex, idx))
             }}
             onPointerOver={() => { document.body.style.cursor = 'pointer' }}
             onPointerOut={() => { document.body.style.cursor = 'default' }}
@@ -332,7 +350,7 @@ function FunnelLevel({ levelIndex, layerTitle, color, onPointClick, selectedPlan
   )
 }
 
-function FunnelOfScenarios({ selectedVariantId, onCloseVariant, selectedPlanePoint, onPlanePointClick, getEntityLabel, showRisks, npv = 50, reserves = 50, extraction = 50 }) {
+function FunnelOfScenarios({ selectedVariantId, onCloseVariant, selectedPlanePoint, onPlanePointClick, onOpenBpm, getEntityLabel, showRisks, npv = 50, reserves = 50, extraction = 50 }) {
   const n0 = POINTS_PER_LEVEL[0]
   const fluxCurvesCubeToL0 = useMemo(() => {
     return Array.from({ length: Math.min(NUM_FLUX_CURVES, n0 * 7) }, (_, i) => {
@@ -402,6 +420,7 @@ function FunnelOfScenarios({ selectedVariantId, onCloseVariant, selectedPlanePoi
           layerTitle={level.layerTitle}
           color={PLANE_LEVEL_COLORS[idx]}
           onPointClick={onPlanePointClick}
+          onOpenBpm={onOpenBpm}
           selectedPlanePoint={selectedPlanePoint}
           getEntityLabel={getEntityLabel}
           showRisks={showRisks}
@@ -422,7 +441,7 @@ function FunnelOfScenarios({ selectedVariantId, onCloseVariant, selectedPlanePoi
   )
 }
 
-function Scene({ npv, reserves, extraction, onPointClick, selectedVariantId, onCloseVariant, selectedPlanePoint, onPlanePointClick, getEntityLabel, showRisks }) {
+function Scene({ npv, reserves, extraction, onPointClick, onOpenBpm, selectedVariantId, onCloseVariant, selectedPlanePoint, onPlanePointClick, getEntityLabel, showRisks }) {
   const points = useMemo(() => Array.from({ length: NUM_POINTS }, (_, i) => i), [])
 
   return (
@@ -441,7 +460,10 @@ function Scene({ npv, reserves, extraction, onPointClick, selectedVariantId, onC
             npv={npv}
             reserves={reserves}
             extraction={extraction}
-            onPointClick={onPointClick}
+            onPointClick={(variantId) => {
+              onPointClick(variantId)
+              onOpenBpm?.(null)
+            }}
           />
         ))}
       </group>
@@ -451,6 +473,7 @@ function Scene({ npv, reserves, extraction, onPointClick, selectedVariantId, onC
         onCloseVariant={onCloseVariant}
         selectedPlanePoint={selectedPlanePoint}
         onPlanePointClick={onPlanePointClick}
+        onOpenBpm={onOpenBpm}
         getEntityLabel={getEntityLabel}
         showRisks={showRisks}
         npv={npv}
@@ -486,7 +509,7 @@ function toMillions(pct, scale) {
   return ((pct / 100) * scale).toFixed(2)
 }
 
-function Hypercube3D() {
+function Hypercube3D({ onOpenBpm }) {
   const [npv, setNpv] = useState(50)
   const [reserves, setReserves] = useState(50)
   const [extraction, setExtraction] = useState(50)
@@ -533,9 +556,9 @@ function Hypercube3D() {
             />
           </label>
         </div>
-        <div className="control-group">
-          <label>
-            Запасы (стратегический рычаг — суммарная добыча нефти/КИН за 30 лет): {reserves}%
+        <div className="control-group control-group-oneline">
+          <label className="slider-label-oneline" title="Запасы (стратегический рычаг — суммарная добыча нефти/КИН за 30 лет)">
+            <span className="slider-label-text">Запасы (стратегический рычаг — суммарная добыча нефти/КИН за 30 лет): {reserves}%</span>
             <span className="control-value"> ({reservesMillions} млн т)</span>
             <input
               type="range"
@@ -581,7 +604,7 @@ function Hypercube3D() {
             </div>
           </div>
           <p className="cube-palette-hint">
-            Цвета точек куба зависят от рычагов (холодные — низкие значения, горячие — высокие). Точки уровней воронки не меняют цвет.
+            Цвета точек куба: по рычагам (холодные/горячие) и по статусу ЦД — красный: критично, серый: нет данных, оранжевый: плохой расчёт по автоанализу.
           </p>
           <div className="cube-palette-legend">
             <span className="cube-legend-cold">Низкие</span>
@@ -628,6 +651,7 @@ function Hypercube3D() {
                 onCloseVariant={() => { setSelectedVariantId(null); setSelectedPlanePoint(null) }}
                 selectedPlanePoint={selectedPlanePoint}
                 onPlanePointClick={(levelIndex, pointIndex) => setSelectedPlanePoint({ levelIndex, pointIndex })}
+                onOpenBpm={onOpenBpm}
                 getEntityLabel={getEntityLabel}
                 showRisks={showRisks}
               />

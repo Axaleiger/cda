@@ -48,7 +48,7 @@
   font-size: 0;
   cursor: pointer;
   box-sizing: border-box;
-  transition: background 0.15s, border-color 0.15s;
+  transition: none;
 }
 
 .wind-rose-outside-label:hover {
@@ -84,7 +84,7 @@
 }
 
 .wind-rose-petal {
-  transition: stroke-opacity 0.2s ease;
+  transition: none;
 }
 
 .wind-rose-contour {
@@ -136,7 +136,7 @@
   cursor: pointer;
   text-align: left;
   width: 100%;
-  transition: background 0.15s, border-color 0.15s;
+  transition: none;
 }
 
 .legend-item:hover {

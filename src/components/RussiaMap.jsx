@@ -114,7 +114,7 @@ function CFArrowsLayer({ show, arrows, hoveredIndex, setHoveredIndex }) {
   )
 }
 
-function RussiaMap() {
+function RussiaMap({ onCdNodeClick }) {
   const [selectedId, setSelectedId] = useState(null)
   const [hoveredId, setHoveredId] = useState(null)
   const [showBudgetFill, setShowBudgetFill] = useState(false)
@@ -256,7 +256,13 @@ function RussiaMap() {
               <Annotation subject={[point.lon, point.lat]} dx={24} dy={16}>
                 <g className="map-chain-vertical">
                   {chain.nodes.map((name, i) => (
-                    <g key={i} transform={`translate(0, ${i * 36})`}>
+                    <g
+                      key={i}
+                      transform={`translate(0, ${i * 36})`}
+                      className="map-chain-node"
+                      style={{ cursor: onCdNodeClick ? 'pointer' : 'default' }}
+                      onClick={() => onCdNodeClick && onCdNodeClick(name)}
+                    >
                       {i > 0 && (
                         <line
                           x1={0}

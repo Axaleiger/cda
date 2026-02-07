@@ -3,11 +3,11 @@ import { AreaChart, Area, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } f
 import './LifecycleChart.css'
 
 const stages = [
-  { key: 'razvedka', name: 'Разведка', color: '#5b8dc9' },
+  { key: 'geologorazvedka', name: 'Геологоразведка и работа с ресурсной базой', color: '#5b8dc9' },
   { key: 'razrabotka', name: 'Разработка', color: '#6b7fd7' },
-  { key: 'burenie', name: 'Бурение', color: '#8b7fd4' },
-  { key: 'dobycha', name: 'Добыча', color: '#7eb8e8' },
-  { key: 'zavershenie', name: 'Завершение', color: '#6bc4a0' },
+  { key: 'planirovanie', name: 'Планирование и обустройство', color: '#8b7fd4' },
+  { key: 'burenie', name: 'Бурение и ВСР', color: '#7eb8e8' },
+  { key: 'dobycha', name: 'Добыча', color: '#6bc4a0' },
 ]
 
 function generateStreamData() {
@@ -17,7 +17,7 @@ function generateStreamData() {
   for (let y = startYear; y <= endYear; y++) {
     const t = (y - startYear) / (endYear - startYear)
     const norm = (x) => Math.max(0, x)
-    const razvedka = norm(
+    const geologorazvedka = norm(
       18 * Math.exp(-Math.pow((y - 1982) / 18, 2)) +
       4 * Math.exp(-Math.pow((y - 2025) / 6, 2)) +
       2 * (1 + 0.3 * Math.sin((y - 1965) * 0.25))
@@ -39,18 +39,18 @@ function generateStreamData() {
       4 * Math.sin((y - 1985) * 0.12) +
       2 * Math.sin((y - 2015) * 0.15)
     )
-    const zavershenie = norm(
-      1 + 12 * Math.pow(t, 2) +
-      3 * Math.exp(-Math.pow((y - 2005) / 15, 2)) +
-      2 * Math.sin((y - 1995) * 0.1)
+    const planirovanie = norm(
+      4 + 10 * Math.exp(-Math.pow((y - 1990) / 12, 2)) +
+      6 * Math.exp(-Math.pow((y - 2015) / 8, 2)) +
+      2 * Math.sin((y - 1980) * 0.12)
     )
     years.push({
       year: String(y),
-      razvedka: Math.round(razvedka * 10) / 10,
+      geologorazvedka: Math.round(geologorazvedka * 10) / 10,
       razrabotka: Math.round(razrabotka * 10) / 10,
+      planirovanie: Math.round(planirovanie * 10) / 10,
       burenie: Math.round(burenie * 10) / 10,
       dobycha: Math.round(dobycha * 10) / 10,
-      zavershenie: Math.round(zavershenie * 10) / 10,
     })
   }
   return years
