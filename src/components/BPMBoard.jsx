@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo } from 'react'
-import { BPM_STAGES, BPM_CARDS_BY_STAGE, PERSONNEL, cardMatchesHighlight } from '../data/bpmData'
+import { BPM_STAGES, BPM_CARDS_BY_STAGE, PERSONNEL, cardMatchesHighlight, BOARD_PRESETS, getInitialBoard } from '../data/bpmData'
 import { parseBoardFromExcel, generateBoardExcel, generateTemplateExcel, generateOntologyExcel } from '../data/bpmExcel'
 import './BPMBoard.css'
 
@@ -95,9 +95,47 @@ function buildGraph(stages, tasks) {
   return { nodes: Array.from(nodes.keys()), edges }
 }
 
+function computeAnalytics(stages, tasks) {
+  const g = buildGraph(stages, tasks)
+  const degree = {}
+  g.nodes.forEach((n) => { degree[n] = 0 })
+  g.edges.forEach(([a, b]) => {
+    degree[a] = (degree[a] || 0) + 1
+    degree[b] = (degree[b] || 0) + 1
+  })
+  const byType = { Этап: 0, Карточка: 0, Система: 0 }
+  g.nodes.forEach((label) => {
+    if (label.startsWith('Этап:')) byType['Этап']++
+    else if (label.startsWith('Карточка:')) byType['Карточка']++
+    else if (label.startsWith('Система:')) byType['Система']++
+  })
+  const sorted = [...g.nodes].sort((a, b) => (degree[b] || 0) - (degree[a] || 0))
+  const topNodes = sorted.slice(0, 10).map((n) => ({ label: n, degree: degree[n] }))
+  const avgByType = {}
+  Object.keys(byType).forEach((t) => {
+    const count = byType[t]
+    if (count === 0) avgByType[t] = 0
+    else {
+      const typeNodes = g.nodes.filter((n) =>
+        (t === 'Этап' && n.startsWith('Этап:')) ||
+        (t === 'Карточка' && n.startsWith('Карточка:')) ||
+        (t === 'Система' && n.startsWith('Система:')))
+      avgByType[t] = (typeNodes.reduce((s, n) => s + (degree[n] || 0), 0) / typeNodes.length).toFixed(1)
+    }
+  })
+  return {
+    nodeCount: g.nodes.length,
+    edgeCount: g.edges.length,
+    byType,
+    avgByType,
+    topNodes,
+  }
+}
+
 function BPMBoard({ highlightCardName, onClose }) {
-  const [stages, setStages] = useState(BPM_STAGES)
-  const [tasks, setTasks] = useState(initialTasks())
+  const [currentBoardId, setCurrentBoardId] = useState('hantos')
+  const [stages, setStages] = useState(() => (getInitialBoard('hantos')?.stages ?? BPM_STAGES))
+  const [tasks, setTasks] = useState(() => (getInitialBoard('hantos')?.tasks ?? initialTasks()))
   const [viewMode, setViewMode] = useState('Подробный вид')
   const [expanded, setExpanded] = useState({})
   const [editingTask, setEditingTask] = useState(null)
@@ -105,6 +143,19 @@ function BPMBoard({ highlightCardName, onClose }) {
   const [stageNameEdit, setStageNameEdit] = useState('')
   const [dragged, setDragged] = useState(null)
   const [uploadError, setUploadError] = useState(null)
+  const [showCalculateView, setShowCalculateView] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [showFilters, setShowFilters] = useState(false)
+
+  const loadBoard = useCallback((boardId) => {
+    const data = getInitialBoard(boardId)
+    if (data) {
+      setCurrentBoardId(boardId)
+      setStages(data.stages)
+      setTasks(data.tasks)
+      setUploadError(null)
+    }
+  }, [])
 
   const toggleExpanded = useCallback((key) => {
     setExpanded((e) => ({ ...e, [key]: !e[key] }))
@@ -264,6 +315,44 @@ function BPMBoard({ highlightCardName, onClose }) {
     return its
   }, [stages.length])
 
+  const analytics = useMemo(() => computeAnalytics(stages, tasks), [stages, tasks])
+  const oilFlowHtml = useMemo(() => generateOilFlowHtml(stages, tasks), [stages, tasks])
+
+  if (showCalculateView) {
+    return (
+      <div className="bpm-board-wrap bpm-calculate-wrap">
+        <div className="bpm-board-header">
+          <h2>Рассчитать — граф и аналитика</h2>
+          <button type="button" className="bpm-btn bpm-btn-primary" onClick={() => setShowCalculateView(false)}>← Назад к доске</button>
+        </div>
+        <div className="bpm-calculate-layout">
+          <div className="bpm-calculate-graph">
+            <iframe title="OilFlow граф" srcDoc={oilFlowHtml} />
+          </div>
+          <div className="bpm-calculate-analytics">
+            <h3>Аналитика графа</h3>
+            <div className="bpm-analytics-row"><span>Узлов:</span> <strong>{analytics.nodeCount}</strong></div>
+            <div className="bpm-analytics-row"><span>Рёбер:</span> <strong>{analytics.edgeCount}</strong></div>
+            <h4>Узлы по типам</h4>
+            <div className="bpm-analytics-row">Этап: <strong>{analytics.byType.Этап}</strong></div>
+            <div className="bpm-analytics-row">Карточка: <strong>{analytics.byType.Карточка}</strong></div>
+            <div className="bpm-analytics-row">Система: <strong>{analytics.byType.Система}</strong></div>
+            <h4>Среднее связей по типу</h4>
+            <div className="bpm-analytics-row">Этап: <strong>{analytics.avgByType.Этап}</strong></div>
+            <div className="bpm-analytics-row">Карточка: <strong>{analytics.avgByType.Карточка}</strong></div>
+            <div className="bpm-analytics-row">Система: <strong>{analytics.avgByType.Система}</strong></div>
+            <h4>Топ узлов по степени</h4>
+            <ul className="bpm-analytics-top">
+              {analytics.topNodes.map(({ label, degree }, i) => (
+                <li key={i}><span className="bpm-analytics-label">{label.length > 40 ? label.slice(0, 37) + '...' : label}</span> <strong>{degree}</strong></li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="bpm-board-wrap">
       <div className="bpm-board-header">
@@ -278,8 +367,31 @@ function BPMBoard({ highlightCardName, onClose }) {
           <button type="button" className="bpm-board-close" onClick={onClose}>Закрыть</button>
         </div>
       </div>
+      <div className="bpm-board-selector">
+        <span className="bpm-board-selector-label">Доска:</span>
+        {Object.entries(BOARD_PRESETS).map(([id, preset]) => (
+          <button
+            key={id}
+            type="button"
+            className={`bpm-board-option ${currentBoardId === id ? 'active' : ''}`}
+            onClick={() => loadBoard(id)}
+          >
+            {preset.label}
+          </button>
+        ))}
+      </div>
       {uploadError && <div className="bpm-error">{uploadError}</div>}
       <div className="bpm-toolbar">
+        <input
+          type="text"
+          className="bpm-search"
+          placeholder="Поиск по доске..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+        <button type="button" className="bpm-btn" onClick={() => setShowFilters(!showFilters)}>
+          {showFilters ? 'Скрыть фильтры' : 'Фильтры'}
+        </button>
         <label className="bpm-radio">
           <input type="radio" name="view" checked={viewMode === 'Упрощенный вид'} onChange={() => setViewMode('Упрощенный вид')} />
           Упрощенный вид
@@ -290,6 +402,7 @@ function BPMBoard({ highlightCardName, onClose }) {
         </label>
         <button type="button" className="bpm-btn" onClick={handleDownloadOilFlow}>Скачать OilFlow граф</button>
         <button type="button" className="bpm-btn" onClick={handleOntology}>Онтология</button>
+        <button type="button" className="bpm-btn bpm-btn-primary" onClick={() => setShowCalculateView(true)}>Рассчитать</button>
         <button type="button" className="bpm-btn bpm-btn-primary" onClick={addStage}>+ Добавить этап</button>
       </div>
       <div className="bpm-board" onDragOver={(e) => e.preventDefault()}>

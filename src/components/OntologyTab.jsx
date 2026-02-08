@@ -94,17 +94,17 @@ function OntologyTab() {
           <svg className="ontology-edges" width="2000" height="2000">
             <defs>
               <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-                <polygon points="0 0, 10 3.5, 0 7" fill="#94a3b8" />
+                <polygon points="0 0, 10 3.5, 0 7" fill="#6b7280" />
               </marker>
             </defs>
             {edges.map((edge) => {
               const from = getNode(edge.from)
               const to = getNode(edge.to)
               if (!from || !to) return null
-              const x1 = from.x + 100
-              const y1 = from.y + 24
-              const x2 = to.x
-              const y2 = to.y + 24
+              const x1 = from.x + 200 - 8
+              const y1 = from.y + 22
+              const x2 = to.x + 8
+              const y2 = to.y + 22
               const mx = (x1 + x2) / 2
               const path = `M ${x1} ${y1} C ${mx} ${y1}, ${mx} ${y2}, ${x2} ${y2}`
               return (
@@ -112,7 +112,7 @@ function OntologyTab() {
                   key={edge.id}
                   d={path}
                   fill="none"
-                  stroke="#94a3b8"
+                  stroke="#5b6378"
                   strokeWidth={2}
                   markerEnd="url(#arrowhead)"
                 />
@@ -126,14 +126,17 @@ function OntologyTab() {
               style={{ left: node.x, top: node.y }}
               onMouseDown={(e) => handleNodeMouseDown(e, node.id)}
             >
-              <div className="ontology-node-handle ontology-node-handle-in" />
-              <span className="ontology-node-label">{node.label}</span>
-              <div className="ontology-node-handle ontology-node-handle-out" />
+              <div className="ontology-node-bar" />
+              <div className="ontology-node-body">
+                <div className="ontology-node-handle ontology-node-handle-in" />
+                <span className="ontology-node-label">{node.label}</span>
+                <div className="ontology-node-handle ontology-node-handle-out" />
+              </div>
             </div>
           ))}
         </div>
       </div>
-      <p className="ontology-hint">Перетаскивайте узлы. Панорама: перетаскивание по пустому месту. Стиль n8n: кубики и связи.</p>
+      <p className="ontology-hint">Перетаскивайте узлы по холсту. Панорама: перетаскивание по пустому месту. Узлы в стиле n8n: кубики с цветной полосой (триггер / процесс / результат).</p>
     </div>
   )
 }

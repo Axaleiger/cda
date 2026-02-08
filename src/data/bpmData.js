@@ -71,6 +71,58 @@ export const BPM_CARDS_BY_STAGE = {
   ],
 }
 
+/** Пресеты досок (Хантос/Зимнее, ННГ/Новогоднее, Мегион/Аганское). */
+export const BOARD_PRESETS = {
+  hantos: {
+    label: 'ООО "Газпромнефть-Хантос" \\ Зимнее',
+    stages: ['Геологоразведка и работа с РБ', 'Разработка', 'Планирование и обустройство', 'Бурение и ВСР', 'Добыча'],
+    tasks: null, // filled below
+  },
+  nng: {
+    label: 'ООО "Газпромнефть-ННГ" \\ Новогоднее',
+    stages: ['Геологоразведка и работа с РБ', 'Разработка', 'Планирование и обустройство', 'Бурение и ВСР', 'Добыча'],
+    tasks: null,
+  },
+  mgn: {
+    label: 'ООО "Газпромнефть-Мегион" \\ Аганское',
+    stages: ['Геологоразведка и работа с РБ', 'Разработка', 'Планирование и обустройство', 'Бурение и ВСР', 'Добыча'],
+    tasks: null,
+  },
+}
+
+function buildPresetTasks(stages) {
+  const cardsByStage = {
+    'Геологоразведка и работа с РБ': [{ id: 'G1', name: 'Оценка запасов' }, { id: 'G2', name: 'Подсчёт КИН' }],
+    'Разработка': [{ id: 'R1', name: 'Проект разработки' }, { id: 'R2', name: 'Схема обустройства' }],
+    'Планирование и обустройство': [{ id: 'P1', name: 'Строительство объектов' }, { id: 'P2', name: 'Пусконаладка' }],
+    'Бурение и ВСР': [{ id: 'B1', name: 'Бурение скважин' }, { id: 'B2', name: 'ГРП' }],
+    'Добыча': [{ id: 'D1', name: 'Эксплуатация' }, { id: 'D2', name: 'Мониторинг' }],
+  }
+  const out = {}
+  stages.forEach((s) => {
+    out[s] = (cardsByStage[s] || BPM_CARDS_BY_STAGE['ЦД программ']?.slice(0, 3) || []).map((c) => ({
+      ...c,
+      executor: PERSONNEL[0],
+      approver: PERSONNEL[0],
+      deadline: new Date(),
+      status: 'в работе',
+      date: new Date().toLocaleDateString('ru-RU'),
+      entries: [{ system: '', input: '', output: '' }],
+    }))
+  })
+  return out
+}
+
+BOARD_PRESETS.hantos.tasks = buildPresetTasks(BOARD_PRESETS.hantos.stages)
+BOARD_PRESETS.nng.tasks = buildPresetTasks(BOARD_PRESETS.nng.stages)
+BOARD_PRESETS.mgn.tasks = buildPresetTasks(BOARD_PRESETS.mgn.stages)
+
+export function getInitialBoard(boardId) {
+  const preset = BOARD_PRESETS[boardId]
+  if (!preset) return null
+  return { stages: [...preset.stages], tasks: JSON.parse(JSON.stringify(preset.tasks)) }
+}
+
 /** Проверяет, совпадает ли карточка с запросом подсветки (из воронки). */
 export function cardMatchesHighlight(cardName, highlightLabel) {
   if (!highlightLabel || !cardName) return false
